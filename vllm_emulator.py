@@ -12,6 +12,8 @@ app = FastAPI()
 
 @app.post("/v1/chat/completions")
 def chat_completions(request: ChatCompletionsRequest):
+    """Respond to the chat completions request appropriately"""
+
     choices = []
     for i in range(request.n):
         generated_text, hit_max_length = gen_paragraph(max_len=request.max_tokens)
@@ -48,6 +50,8 @@ def chat_completions(request: ChatCompletionsRequest):
 
 @app.post("/v1/completions")
 def completions(request: CompletionsRequest):
+    """Respond to the completions request appropriately"""
+
     choices = []
     for i in range(request.n):
         if request.echo:
