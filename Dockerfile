@@ -7,7 +7,7 @@ COPY bigrams.json app/
 WORKDIR app
 
 # install python
-RUN dnf install -y jq python3.11 python3.11-devel python3.11-pip unzip && \
+RUN dnf install -y jq python3.12 python3.12-devel python3.12-pip unzip && \
     dnf clean all && \
     pip3 install -r requirements.txt
 
