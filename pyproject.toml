@@ -1,0 +1,11 @@
+[project]
+name = "vllm-emulator"
+version = "0.1.0"
+description = "Emulates a vLLM-served LLM, providing mock /v1/completions and /v1/chat/completions endpoints"
+readme = "README.md"
+requires-python = "~=3.12"
+dependencies = [
+    "fastapi[standard]~=0.116.1",
+    "numpy~=2.3.1",
+    "pydantic~=2.11.7",
+]
