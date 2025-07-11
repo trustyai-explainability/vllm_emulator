@@ -6,6 +6,7 @@ Emulates a vLLM-served LLM, providing mock `/v1/completions` and `/v1/chat/compl
 
 ```bash
 pip3 install -r requirements.txt
+# OR uv venv; uv sync
 fastapi dev vllm_emulator.py
 ```
 
