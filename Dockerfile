@@ -12,4 +12,4 @@ RUN dnf install -y jq python3.11 python3.11-devel python3.11-pip unzip && \
     pip3 install -r requirements.txt
 
 EXPOSE 8000
-CMD ["fastapi", "run", "vllm_emulator.py"]
+CMD ["uvicorn", "vllm_emulator:app", "--host", "0.0.0.0", "--port", "8000"]

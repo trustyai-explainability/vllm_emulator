@@ -1,14 +1,19 @@
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 import uuid
 import time
 import random
 import re
 
 from text_generation import gen_paragraph
+
 from api import ChatCompletionsRequest, CompletionsRequest
 
 app = FastAPI()
 
+@app.get("/health")
+def health():
+    return JSONResponse(content={"status": "ok"})
 
 @app.post("/v1/chat/completions")
 def chat_completions(request: ChatCompletionsRequest):
