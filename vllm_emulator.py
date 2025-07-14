@@ -44,7 +44,7 @@ def chat_completions(request: ChatCompletionsRequest):
     return {
         "id": "chat_completion_" + uuid.uuid4().hex,
         "object": "chat.completion",
-        "created": time.time(),
+        "created": int(time.time()),
         "model": request.model,
         "system_fingerprint": uuid.uuid4().hex,
         "choices": choices,
