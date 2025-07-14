@@ -20,6 +20,10 @@ def chat_completions(request: ChatCompletionsRequest):
     """Respond to the chat completions request appropriately"""
 
     choices = []
+
+    generated_tokens = 0
+    prompt_tokens = sum([len(message['content'].split()) for message in request.messages])
+
     for i in range(request.n):
         generated_text, hit_max_length = gen_paragraph(max_len=request.max_tokens)
 
@@ -34,6 +38,7 @@ def chat_completions(request: ChatCompletionsRequest):
                      })
         else:
             logprobs = None
+        generated_tokens += len(generated_text.split())
         choices.append({
             "index": i,
             "message": {"role": "assistant", "content": generated_text, "refusal": None},
@@ -49,7 +54,12 @@ def chat_completions(request: ChatCompletionsRequest):
         "system_fingerprint": uuid.uuid4().hex,
         "choices": choices,
         "usage": {
-        }
+            "prompt_tokens": prompt_tokens,
+            "total_tokens": prompt_tokens + generated_tokens,
+            "completion_tokens": generated_tokens,
+            "prompt_tokens_details": None,
+        },
+        "prompt_logprobs": None
     }
 
 
