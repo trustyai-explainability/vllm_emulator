@@ -1,9 +1,9 @@
 name: Security Scan
 
 on:
-  push:
-    branches: [main]
   pull_request:
+    branches: [main]
+  push:
     branches: [main]
   workflow_dispatch:
 
@@ -12,53 +12,43 @@ jobs:
     name: Trivy
     runs-on: ubuntu-latest
     permissions:
-      contents: read
       security-events: write
       actions: read
+      contents: read
+      checks: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f pyproject.toml ]; then
-            pip install -e ".[dev]"
-          fi
-
       - name: Run Trivy vulnerability scan
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
-          exit-code: '0'
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH,MEDIUM,LOW
+          exit-code: 0
+
       - name: Check for critical and high vulnerabilities
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'table'
-          severity: 'CRITICAL,HIGH'
-          exit-code: '1'
+          scan-type: fs
+          scan-ref: .
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: 1
         continue-on-error: true
 
-      - name: Upload Trivy scan results to Security tab
-        uses: github/codeql-action/upload-sarif@v3
+      - name: Upload SARIF to Security tab
         if: always()
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: 'trivy-results.sarif'
-          category: 'trivy-security-scan'
+          sarif_file: trivy-results.sarif
+          category: trivy-security-scan
 
-  bandit-scan:
+  bandit:
     name: Bandit
     runs-on: ubuntu-latest
     permissions:
@@ -70,44 +60,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: "pip"
-
-      - name: Create virtual environment
-        run: |
-          python -m pip install --upgrade pip
-          python -m venv .venv
-
-      - name: Install dependencies
-        run: |
-          source .venv/bin/activate
-          pip install -e .
-
-      - name: Install Bandit
-        run: |
-          source .venv/bin/activate
-          pip install bandit[sarif]
-
-      - name: Run Bandit Security Scan
+      - name: Run Bandit code scan
         uses: PyCQA/bandit-action@v1
         with:
-          targets: "."
+          project_path: .
+          bandit_args: "-r . -f sarif -o results.sarif"
+        continue-on-error: true
 
-      - name: Upload SARIF results to Security tab
-        if: github.ref == 'refs/heads/main'
+      - name: Upload SARIF as artifact
+        if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
           category: bandit-security-scan
-        continue-on-error: true
-
-      - name: Upload SARIF as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: bandit-sarif-results
-          path: results.sarif
-          retention-days: 30
-        continue-on-error: true
