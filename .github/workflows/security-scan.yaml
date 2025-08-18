@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@77137e9dc3ab1b329b7c8a38c2eb7475850a14e8
         with:
           scan-type: fs
           scan-ref: .
@@ -32,14 +32,13 @@ jobs:
           exit-code: 0
 
       - name: Check for critical and high vulnerabilities
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@77137e9dc3ab1b329b7c8a38c2eb7475850a14e8
         with:
           scan-type: fs
           scan-ref: .
           format: table
           severity: CRITICAL,HIGH
           exit-code: 1
-        continue-on-error: true
 
       - name: Upload SARIF to Security tab
         if: always()
@@ -61,10 +60,18 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run Bandit code scan
-        uses: PyCQA/bandit-action@v1
+        uses: PyCQA/bandit-action@67a458d90fa11fb1463e91e7f4c8f068b5863c7f
         with:
           project_path: .
           bandit_args: "-r . -f sarif -o results.sarif"
+        continue-on-error: true
+        
+      - name: Upload SARIF results to GitHub Security tab
+        if: github.ref == 'refs/heads/main'
+        uses: github/codeql-action/upload-sarif@86b04fb0e47484f7282357688f21d5d0e32175fe
+        with:
+          sarif_file: results.sarif
+          category: bandit-security-scan
         continue-on-error: true
 
       - name: Upload SARIF as artifact
